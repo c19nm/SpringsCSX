@@ -14,6 +14,7 @@ package SpringsNMKTL;
 public class BungeeJump{
 	public static void main(String[] args) {
 		System.out.println("hi");
+		System.out.println("what's up");
 	}
 }
 //public class BungeeJump extends AbstractSimulation {
