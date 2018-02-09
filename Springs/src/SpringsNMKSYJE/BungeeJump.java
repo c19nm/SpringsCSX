@@ -29,7 +29,7 @@ public class BungeeJump extends AbstractSimulation {
 	double b = .02;
 
 	// time
-	double timeStep = .01;
+	double timeStep = .1;
 
 	// acceleration
 	double g = 9.81;
@@ -40,17 +40,16 @@ public class BungeeJump extends AbstractSimulation {
 	double mSpring = 3;
 	double deltax = 6;
 	double lengthBungee = 40;
-
-	// balls
-	ArrayList<Circle> balls = new ArrayList<Circle>();
-
-	// number of springs in the length of 40m
-	double springNumber = 200;
-	double drop = 1;
+	int springNumber = 100; // number of springs in the length of 40m
+	double springLength = (lengthBungee / springNumber);
+	int lastSpring = springNumber - 1;
 
 	// creates array list of balls
 	ArrayList<Spring> bungee = new ArrayList<Spring>();
 	boolean FreeFall = true;
+	int i = 0;
+	int droppedLast = lastSpring;
+	int reverse = 2;
 
 	@Override
 	public void initialize() {
@@ -72,49 +71,83 @@ public class BungeeJump extends AbstractSimulation {
 	}
 
 	protected void doStep() {
-		// going through each spring
-		for (int i = 0; i < drop; i++) {
-			// free fall for the first 40 meters
-			if (FreeFall == true) {
-				// delays the animation
-				try {
-					Thread.sleep(1);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+		// free fall for the first 40 meters
+		if (FreeFall == true) {
+			// delays the animation
+			try {
+				Thread.sleep(1);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			System.out.println("ONE");
+
+			// new velocity
+			bungee.get(lastSpring).setV(bungee.get(lastSpring).getVold() + bungee.get(lastSpring).getA() * timeStep);
+
+			// using a Riemann sum of the right hand rule to get the position
+			bungee.get(lastSpring)
+					.setPosition(bungee.get(lastSpring).getPosition() + (timeStep * bungee.get(lastSpring).getV()));
+
+			// sets the animation position
+			bungee.get(lastSpring).setXY(bungee.get(lastSpring).getX(), bungee.get(lastSpring).getPosition());
+
+			// update velocity
+			bungee.get(lastSpring).setVold(bungee.get(lastSpring).getV());
+
+			// new acceleration taking into account air resistance
+			bungee.get(lastSpring).setA(-(g - (b * bungee.get(lastSpring).getV() * bungee.get(lastSpring).getV())));
+
+			// stopping the freefall
+//			if (bungee.get(lastSpring - 1).getPosition() < -40) {
+//				// System.out.println("made it");
+//				FreeFall = false;
+//				bungee.get(lastSpring).color = Color.blue;
+//			}
+
+			this.setDelayTime(1);
+
+			// adds it so each segment is going one after the other
+
+			// do we need the 1/k1 + 1/k2 = 1/k thing?
+			// System.out.println("dropped: " + droppedLast);
+			// System.out.println(bungee.get(droppedLast).getPosition());
+			if (bungee.get(droppedLast).getPosition() < -springLength) {
+				System.out.println(reverse);
+				if (reverse + 1 < springNumber) {
+					System.out.println("hi");
+					reverse++;
 				}
-
-				// new velocity
-				bungee.get(i).setV(bungee.get(i).getVold() + bungee.get(i).getA() * timeStep);
-
-				// using a Riemann sum of the right hand rule to get the position
-				bungee.get(i).setPosition(bungee.get(i).getPosition() + (timeStep * bungee.get(i).getV()));
-
-				// sets the animation position
-				bungee.get(i).setXY(bungee.get(i).getX(), bungee.get(i).getPosition());
-
-				// update velocity
-				bungee.get(i).setVold(bungee.get(i).getV());
-
-				// new acceleration taking into account air resistance
-				bungee.get(i).setA(-(g - (b * bungee.get(i).getV() * bungee.get(i).getV())));
-
-				// stopping the freefall
-				if (bungee.get(i).getPosition() < -40) {
-					System.out.println("made it");
-					FreeFall = false;
-					bungee.get(i).color = Color.blue;
-				}
-
-				this.setDelayTime(1);
-
-				// adds it so each segment is going one after the other
-				if (drop < springNumber) {
-					if (i == drop - 1) {
-						System.out.println("what");
-						drop++;
-						i = 0;
+			}
+			if (reverse > 1) {
+				for (int j = 1; j < reverse; j++) {
+					if(j == 3) {
+						System.out.println("TWO");
 					}
+					// 199-0
+					// 199-1
+					// 199-2
+					// new velocity
+					bungee.get(lastSpring - j)
+							.setV(bungee.get(lastSpring).getVold() + bungee.get(lastSpring).getA() * timeStep);
+
+					// using a Riemann sum of the right hand rule to get the position
+					bungee.get(lastSpring - j).setPosition(
+							bungee.get(lastSpring - j).getPosition() + (timeStep * bungee.get(lastSpring - j).getV()));
+
+					// sets the animation position
+					bungee.get(lastSpring - j).setXY(bungee.get(lastSpring - j).getX(),
+							bungee.get(lastSpring - j).getPosition());
+
+					// update velocity
+					bungee.get(lastSpring - j).setVold(bungee.get(lastSpring - j).getV());
+
+					// new acceleration taking into account air resistance
+					bungee.get(lastSpring - j)
+							.setA(-(g - (b * bungee.get(lastSpring - j).getV() * bungee.get(lastSpring - j).getV())));
+
+					// making this the last one
+					droppedLast = lastSpring - j;
 				}
 			}
 		}
