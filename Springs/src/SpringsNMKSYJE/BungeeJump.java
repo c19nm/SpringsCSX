@@ -71,6 +71,10 @@ public class BungeeJump extends AbstractSimulation {
 	}
 
 	protected void doStep() {
+
+		int count = 0;
+		count++;
+		System.out.println("count is: " + count);
 		// free fall for the first 40 meters
 		if (FreeFall == true) {
 			// delays the animation
@@ -99,11 +103,11 @@ public class BungeeJump extends AbstractSimulation {
 			bungee.get(lastSpring).setA(-(g - (b * bungee.get(lastSpring).getV() * bungee.get(lastSpring).getV())));
 
 			// stopping the freefall
-//			if (bungee.get(lastSpring - 1).getPosition() < -40) {
-//				// System.out.println("made it");
-//				FreeFall = false;
-//				bungee.get(lastSpring).color = Color.blue;
-//			}
+			if (bungee.get(lastSpring - 1).getPosition() < -40) {
+				// System.out.println("made it");
+				FreeFall = false;
+				bungee.get(lastSpring).color = Color.blue;
+			}
 
 			this.setDelayTime(1);
 
@@ -121,12 +125,9 @@ public class BungeeJump extends AbstractSimulation {
 			}
 			if (reverse > 1) {
 				for (int j = 1; j < reverse; j++) {
-					if(j == 3) {
+					if (j == 3) {
 						System.out.println("TWO");
 					}
-					// 199-0
-					// 199-1
-					// 199-2
 					// new velocity
 					bungee.get(lastSpring - j)
 							.setV(bungee.get(lastSpring).getVold() + bungee.get(lastSpring).getA() * timeStep);
@@ -150,8 +151,23 @@ public class BungeeJump extends AbstractSimulation {
 					droppedLast = lastSpring - j;
 				}
 			}
+		} else {
+			bungee.get(lastSpring).setV(bungee.get(lastSpring).getVold() + bungee.get(lastSpring).getA() * timeStep);
+
+			// using a Riemann sum of the right hand rule to get the position
+			bungee.get(lastSpring)
+					.setPosition(bungee.get(lastSpring).getPosition() + (timeStep * bungee.get(lastSpring).getV()));
+
+			// sets the animation position
+			bungee.get(lastSpring).setXY(bungee.get(lastSpring).getX(), bungee.get(lastSpring).getPosition());
+
+			// update velocity
+			bungee.get(lastSpring).setVold(bungee.get(lastSpring).getV());
+
+			// new acceleration taking into account air resistance
+			bungee.get(lastSpring).setA(-(g - (b * bungee.get(lastSpring).getV() * bungee.get(lastSpring).getV())));
+			// array of masses??
 		}
-		// array of masses??
 
 	}
 
