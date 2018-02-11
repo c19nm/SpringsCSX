@@ -36,29 +36,38 @@ public class BungeeJump extends AbstractSimulation {
 	double a = -g;
 
 	// bungeee
+	double massPerson = 50;
 	double Kb = 3;
 	double mSpring = 3;
-	double deltax = 6;
+	double deltax = .5;
 	double lengthBungee = 40;
-	int springNumber = 100; // number of springs in the length of 40m
+	double springNumber = 100; // number of springs in the length of 40m
 	double springLength = (lengthBungee / springNumber);
-	int lastSpring = springNumber - 1;
+	int lastSpring = (int) (springNumber - 1);
 
 	// creates array list of balls
 	ArrayList<Spring> bungee = new ArrayList<Spring>();
 	boolean FreeFall = true;
-	int i = 0;
+	int iterations = 0;
 	int droppedLast = lastSpring;
 	int reverse = 2;
+	int count = 1;
+	double Fg = 0;
+	double Fup = 0;
 
 	@Override
 	public void initialize() {
 		// simulation
-		d.setPreferredMinMax(-10, 10, -50, 5);
+		d.setPreferredMinMax(-10, 10, -50, 2);
 		d.setVisible(true);
+		Circle origin = new Circle();
+		origin.color = Color.black;
+		origin.setXY(control.getDouble("x"), control.getDouble("y"));
+		d.addDrawable(origin);
+		origin.pixRadius = 2;
 
 		for (int i = 0; i < springNumber; i++) {
-			Spring s = new Spring(Kb, mSpring, 0, deltax, 0, 0, 0);
+			Spring s = new Spring(Kb, mSpring, 0, 0, 0, a, 0);
 			// makes the balls start at the given coordinates
 			s.setXY(control.getDouble("x"), control.getDouble("y"));
 			// sets radius of balls to 3 pix
@@ -67,107 +76,103 @@ public class BungeeJump extends AbstractSimulation {
 			bungee.add(s);
 			// adds the balls to the simulation
 			d.addDrawable(s);
+			s.color = Color.white;
+			s.setPosition(i * springLength);
 		}
 	}
 
 	protected void doStep() {
+		// delays the animation
+		try {
+			Thread.sleep(100);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
-		int count = 0;
-		count++;
-		System.out.println("count is: " + count);
 		// free fall for the first 40 meters
 		if (FreeFall == true) {
-			// delays the animation
-			try {
-				Thread.sleep(1);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			for (int j = 0; j < springNumber; j++) {
+				bungee.get(j).setV(bungee.get(j).getVold() + bungee.get(j).getA() * timeStep);
+
+				// using a Riemann sum of the right hand rule to get the position
+				bungee.get(j).setPosition(bungee.get(j).getPosition() + (timeStep * bungee.get(j).getV()));
+
+				// sets the animation position
+				bungee.get(j).setXY(bungee.get(j).getX(), bungee.get(j).getPosition());
+
+				// update velocity
+				bungee.get(j).setVold(bungee.get(j).getV());
+
+				// new acceleration taking into account air resistance
+				bungee.get(j).setA(-(g - (b * bungee.get(j).getV() * bungee.get(j).getV())));
+
+				if (bungee.get(j).getPosition() < 0) {
+					bungee.get(j).color = Color.red;
+				}
 			}
-			System.out.println("ONE");
-
-			// new velocity
-			bungee.get(lastSpring).setV(bungee.get(lastSpring).getVold() + bungee.get(lastSpring).getA() * timeStep);
-
-			// using a Riemann sum of the right hand rule to get the position
-			bungee.get(lastSpring)
-					.setPosition(bungee.get(lastSpring).getPosition() + (timeStep * bungee.get(lastSpring).getV()));
-
-			// sets the animation position
-			bungee.get(lastSpring).setXY(bungee.get(lastSpring).getX(), bungee.get(lastSpring).getPosition());
-
-			// update velocity
-			bungee.get(lastSpring).setVold(bungee.get(lastSpring).getV());
-
-			// new acceleration taking into account air resistance
-			bungee.get(lastSpring).setA(-(g - (b * bungee.get(lastSpring).getV() * bungee.get(lastSpring).getV())));
-
-			// stopping the freefall
-			if (bungee.get(lastSpring - 1).getPosition() < -40) {
-				// System.out.println("made it");
+			if (bungee.get(0).getPosition() < -40) {
+				for (int i = 0; i < springNumber; i++) {
+					bungee.get(i).setPosition(bungee.get(i).getPosition() + (0 - bungee.get(lastSpring).getPosition()));
+					bungee.get(i).setXY(bungee.get(i).getX(), bungee.get(i).getPosition());
+				}
+				System.out.println(bungee.get(0).getPosition());
+				System.out.println(bungee.get(lastSpring).getPosition());
 				FreeFall = false;
-				bungee.get(lastSpring).color = Color.blue;
 			}
 
-			this.setDelayTime(1);
-
-			// adds it so each segment is going one after the other
-
-			// do we need the 1/k1 + 1/k2 = 1/k thing?
-			// System.out.println("dropped: " + droppedLast);
-			// System.out.println(bungee.get(droppedLast).getPosition());
-			if (bungee.get(droppedLast).getPosition() < -springLength) {
-				System.out.println(reverse);
-				if (reverse + 1 < springNumber) {
-					System.out.println("hi");
-					reverse++;
-				}
-			}
-			if (reverse > 1) {
-				for (int j = 1; j < reverse; j++) {
-					if (j == 3) {
-						System.out.println("TWO");
-					}
-					// new velocity
-					bungee.get(lastSpring - j)
-							.setV(bungee.get(lastSpring).getVold() + bungee.get(lastSpring).getA() * timeStep);
-
-					// using a Riemann sum of the right hand rule to get the position
-					bungee.get(lastSpring - j).setPosition(
-							bungee.get(lastSpring - j).getPosition() + (timeStep * bungee.get(lastSpring - j).getV()));
-
-					// sets the animation position
-					bungee.get(lastSpring - j).setXY(bungee.get(lastSpring - j).getX(),
-							bungee.get(lastSpring - j).getPosition());
-
-					// update velocity
-					bungee.get(lastSpring - j).setVold(bungee.get(lastSpring - j).getV());
-
-					// new acceleration taking into account air resistance
-					bungee.get(lastSpring - j)
-							.setA(-(g - (b * bungee.get(lastSpring - j).getV() * bungee.get(lastSpring - j).getV())));
-
-					// making this the last one
-					droppedLast = lastSpring - j;
-				}
-			}
 		} else {
-			bungee.get(lastSpring).setV(bungee.get(lastSpring).getVold() + bungee.get(lastSpring).getA() * timeStep);
+			// System.out.println("here " + count);
+			if (iterations < springNumber) {
+				for (int i = 0; i < count; i++) {
+					System.out.println("NOW");
 
-			// using a Riemann sum of the right hand rule to get the position
-			bungee.get(lastSpring)
-					.setPosition(bungee.get(lastSpring).getPosition() + (timeStep * bungee.get(lastSpring).getV()));
+					bungee.get(i).setDeltax(deltax);
 
-			// sets the animation position
-			bungee.get(lastSpring).setXY(bungee.get(lastSpring).getX(), bungee.get(lastSpring).getPosition());
+					System.out.println("here");
+					bungee.get(i).setPosition(bungee.get(i).getPosition() - deltax);
+					bungee.get(i).setXY(bungee.get(i).getX(), bungee.get(i).getPosition());
+				}
+				// // setting velocity
+				// bungee.get(k).setV(bungee.get(k).getVold() + bungee.get(k).getA() *
+				// timeStep);
+				//
+				// // using a Riemann sum of the right hand rule to get the position
+				// bungee.get(k).setPosition(bungee.get(k).getPosition() + (timeStep *
+				// bungee.get(k).getV()));
+				//
+				// // sets the animation position
+				// bungee.get(k).setXY(bungee.get(k).getX(), bungee.get(k).getPosition());
+				//
+				// // update velocity
+				// bungee.get(k).setVold(bungee.get(k).getV());
+				// // new acceleration taking into account air resistance
+				// // bungee.get(j).setA(-(g - (b * bungee.get(j).getV() *
+				// bungee.get(j).getV())));
+				// Fg = (massPerson * g) + (bungee.get(0).getM() * g * count);
+				// Fup = (bungee.get(0).getK() * Math.pow(bungee.get(0).getDeltax(), 2) *
+				// count);
+				// if (j > 0 && j < lastSpring - 1) {
+				// bungee.get(j)
+				// .setA((Fup - Fg - bungee.get(j - 1).getK() * Math.pow(bungee.get(j +
+				// 1).getDeltax(), 2))
+				// / (2 * bungee.get(j + 1).getM()));
+				// } else if (j == 0) {
+				// bungee.get(j).setA((bungee.get(j + 1).getK() * Math.pow(bungee.get(j +
+				// 1).getDeltax(), 2) - Fg)
+				// / (2 * bungee.get(j + 1).getM()));
+				// } else if (j == lastSpring) {
+				// bungee.get(j).setA(0);
+				// }
 
-			// update velocity
-			bungee.get(lastSpring).setVold(bungee.get(lastSpring).getV());
-
-			// new acceleration taking into account air resistance
-			bungee.get(lastSpring).setA(-(g - (b * bungee.get(lastSpring).getV() * bungee.get(lastSpring).getV())));
-			// array of masses??
+			}
+			iterations++;
+			if (count < springNumber) {
+				count++;
+			}
 		}
+
+		// array of masses??
 
 	}
 
