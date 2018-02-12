@@ -29,7 +29,7 @@ public class BungeeJump extends AbstractSimulation {
 	double b = .02;
 
 	// time
-	double timeStep = .1;
+	double timeStep = .01;
 
 	// acceleration
 	double g = 9.81;
@@ -37,11 +37,11 @@ public class BungeeJump extends AbstractSimulation {
 
 	// bungeee
 	double massPerson = 50;
-	double Kb = 300;
-	double mSpring = 10;
+	double Kb = 100;
+	double mSpring = 1;
 	double deltax = .5;
 	double lengthBungee = 40;
-	double springNumber = 100; // number of springs in the length of 40m
+	double springNumber = 10; // number of springs in the length of 40m
 	double springLength = (lengthBungee / springNumber);
 	int lastSpring = (int) (springNumber - 1);
 
@@ -52,8 +52,9 @@ public class BungeeJump extends AbstractSimulation {
 	int droppedLast = lastSpring;
 	int reverse = 2;
 	int count = 1;
-	double Fg = 0;
+	double Fdown = 0;
 	double Fup = 0;
+	double Fg = 0;
 	double firstBounce = 0;
 
 	@Override
@@ -72,32 +73,39 @@ public class BungeeJump extends AbstractSimulation {
 			// makes the balls start at the given coordinates
 			s.setXY(control.getDouble("x"), control.getDouble("y"));
 			// sets radius of balls to 3 pix
-			s.pixRadius = 2;
+			s.pixRadius = 3;
 			// adds the ball to the array list of balls called "balls"
 			bungee.add(s);
 			// adds the balls to the simulation
 			d.addDrawable(s);
 			s.color = Color.white;
-			s.setPosition(i * springLength);
+			if (i == lastSpring) {
+				s.setPosition(0);
+				s.color = Color.red;
+			} else {
+				s.setPosition(i * springLength);
+			}
 		}
 	}
 
 	protected void doStep() {
+		this.setDelayTime(1);
 		// delays the animation
-		try {
-			Thread.sleep(10);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		// try {
+		// Thread.sleep(10);
+		// } catch (InterruptedException e) {
+		// // TODO Auto-generated catch block
+		// e.printStackTrace();
+		// }
 
 		// free fall for the first 40 meters
 		if (FreeFall == true) {
-			for (int j = 0; j < springNumber; j++) {
+			for (int j = 0; j < springNumber - 1; j++) {
 				bungee.get(j).setV(bungee.get(j).getVold() + bungee.get(j).getA() * timeStep);
 
 				// using a Riemann sum of the right hand rule to get the position
-				bungee.get(j).setPosition(bungee.get(j).getPosition() + (timeStep * bungee.get(j).getV()));
+				bungee.get(j).setPosition(0.5 * bungee.get(j).getA() * timeStep * timeStep + bungee.get(j).getPosition()
+						+ (timeStep * bungee.get(j).getV()));
 
 				// sets the animation position
 				bungee.get(j).setXY(bungee.get(j).getX(), bungee.get(j).getPosition());
@@ -109,69 +117,52 @@ public class BungeeJump extends AbstractSimulation {
 				bungee.get(j).setA(-(g - (b * bungee.get(j).getV() * bungee.get(j).getV())));
 
 				if (bungee.get(j).getPosition() < 0) {
-					bungee.get(j).color = Color.red;
+					if (j == 0) {
+						bungee.get(j).color = Color.blue;
+					} else {
+						bungee.get(j).color = Color.red;
+					}
 				}
 			}
 			if (bungee.get(0).getPosition() < -40) {
-				for (int i = 0; i < springNumber; i++) {
-					bungee.get(i).setPosition(bungee.get(i).getPosition() + (0 - bungee.get(lastSpring).getPosition()));
-					bungee.get(i).setXY(bungee.get(i).getX(), bungee.get(i).getPosition());
-				}
 				FreeFall = false;
 			}
 
 		} else {
-			// System.out.println("here " + count);
-			if (iterations < springNumber) {
-				for (int i = 0; i < iterations + 1; i++) {
-					bungee.get(i).setDeltax(deltax);
-					bungee.get(i).setPosition(bungee.get(i).getPosition() - deltax);
-					bungee.get(i).setXY(bungee.get(i).getX(), bungee.get(i).getPosition());
+			for (int j = 0; j < springNumber - 1; j++) {
+				// last spring
+				if (j == 0) {
+					Fup = bungee.get(0).getK()
+							* (bungee.get(1).getPosition() - bungee.get(0).getPosition() - springLength);
+					Fg = g * massPerson;
+					bungee.get(0).setA((Fup - Fg) / massPerson);
 				}
-				iterations++;
-			} else {
-				if (firstBounce < springNumber) {
-					Fg = (massPerson * g) + (bungee.get(0).getM() * g * firstBounce);
-					Fup = (bungee.get(0).getK() * Math.pow(bungee.get(0).getDeltax(), 2) * springNumber);
 
-					for (int j = 0; j < firstBounce + 1; j++) {
-						// last spring
-						if (j == 0) {
-							bungee.get(j)
-									.setA((bungee.get(j + 1).getK() * Math.pow(bungee.get(j + 1).getDeltax(), 2) - Fg)
-											/ (2 * bungee.get(j + 1).getM()));
-						}
-						// first spring
-						else if (j == lastSpring) {
-							bungee.get(j).setA(0);
-						}
-						// middle springs
-						else {
-							bungee.get(j).setA(
-									((Fup) - Fg - bungee.get(j - 1).getK() * Math.pow(bungee.get(j + 1).getDeltax(), 2))
-											/ (2 * bungee.get(j + 1).getM()));
-						}
-
-						bungee.get(j).setV(bungee.get(j).getVold() + bungee.get(j).getA() * timeStep);
-
-						// using a Riemann sum of the right hand rule to get the position
-						bungee.get(j).setPosition(bungee.get(j).getPosition() + (timeStep * bungee.get(j).getV()));
-
-						// sets the animation position
-						bungee.get(j).setXY(bungee.get(j).getX(), bungee.get(j).getPosition());
-
-						// update velocity
-						bungee.get(j).setVold(bungee.get(j).getV());
-
-					}
-
-					firstBounce++;
+				// middle springs
+				else {
+					Fdown = bungee.get(j).getK()
+							* (-bungee.get(j - 1).getPosition() + bungee.get(j).getPosition() - springLength);
+					Fup = bungee.get(j).getK()
+							* (bungee.get(j + 1).getPosition() - bungee.get(j).getPosition() - springLength);
+					Fg = bungee.get(j).getM() * g;
+					bungee.get(j).setA(((Fup - Fdown - Fg) / bungee.get(j).getM()));
 				}
+				System.out.println(Fup);
+
+				bungee.get(j).setV(bungee.get(j).getVold() + bungee.get(j).getA() * timeStep);
+
+				// using a Riemann sum of the right hand rule to get the position
+				bungee.get(j).setPosition(0.5 * bungee.get(j).getA() * timeStep * timeStep + bungee.get(j).getPosition()
+						+ (timeStep * bungee.get(j).getV()));
+
+				// sets the animation position
+				bungee.get(j).setXY(bungee.get(j).getX(), bungee.get(j).getPosition());
+
+				// update velocity
+				bungee.get(j).setVold(bungee.get(j).getV());
+
 			}
-
 		}
-
-		// array of masses??
 
 	}
 
