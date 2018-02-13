@@ -1,7 +1,6 @@
 package SpringsNMKSYJE;
 
 import org.opensourcephysics.controls.SimulationControl;
-import org.opensourcephysics.display.Circle;
 import org.opensourcephysics.frames.DisplayFrame;
 import java.awt.Color;
 import java.util.ArrayList;
@@ -30,7 +29,7 @@ public class BungeeFinal extends AbstractSimulation {
 	double bungeeMass = 10;
 	double bungeeLength = 40;
 	double springNumber = 20;
-	double kTotal = 12;
+	double kTotal = 29;
 	double k = kTotal * springNumber;
 	double springMass = (bungeeMass / springNumber);
 	ArrayList<Spring> bungee = new ArrayList<Spring>();
@@ -41,6 +40,9 @@ public class BungeeFinal extends AbstractSimulation {
 
 	@Override
 	public void initialize() {
+		DrawableShape bridge = DrawableShape.createRectangle(0, 0.1, 100, 0.2);
+		d.addDrawable(bridge);
+		bridge.setMarkerColor(Color.BLACK, Color.green);
 		d.setPreferredMinMax(-10, 10, -120, 2);
 		d.setVisible(true);
 		for (int i = 0; i < springNumber; i++) {
@@ -117,7 +119,6 @@ public class BungeeFinal extends AbstractSimulation {
 				bungee.get(i).setPosition((0.5 * bungee.get(i).getA() * Math.pow(timeStep, 2))
 						+ (bungee.get(i).getVold() * timeStep) + bungee.get(i).getPosition());
 				bungee.get(i).setXY(control.getDouble("x"), bungee.get(i).getPosition());
-				System.out.println(bungee.get(0).getPosition());
 			}
 		}
 
