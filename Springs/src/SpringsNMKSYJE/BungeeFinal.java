@@ -10,8 +10,6 @@ import org.opensourcephysics.display.*;
 import org.opensourcephysics.frames.*;
 
 public class BungeeFinal extends AbstractSimulation {
-	// simulation
-
 	// create a display frame named d
 	DisplayFrame d = new DisplayFrame("X", "Y", "Bungee Jumping Simulation");
 
@@ -39,7 +37,7 @@ public class BungeeFinal extends AbstractSimulation {
 	public void initialize() {
 		DrawableShape bridge = DrawableShape.createRectangle(0, 0.1, 100, 0.2);
 		d.addDrawable(bridge);
-		bridge.setMarkerColor(Color.BLACK, Color.green);
+		bridge.setMarkerColor(Color.BLACK, Color.blue);
 		d.setPreferredMinMax(-10, 10, -120, 2);
 		d.setVisible(true);
 		for (int i = 0; i < springNumber; i++) {
@@ -78,7 +76,7 @@ public class BungeeFinal extends AbstractSimulation {
 						bungee.get(i).color = Color.red;
 					}
 				}
-				bungee.get(0).color = Color.blue;
+				bungee.get(0).color = Color.green;
 				bungee.get(i).setXY(control.getDouble("x"), bungee.get(i).getPosition());
 				if (bungee.get(0).getPosition() <= -40) {
 					FreeFall = false;
