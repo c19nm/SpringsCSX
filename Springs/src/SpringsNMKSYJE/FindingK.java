@@ -10,7 +10,7 @@ import org.opensourcephysics.controls.SimulationControl;
 import org.opensourcephysics.display.*;
 import org.opensourcephysics.frames.*;
 
-public class BungeeFinal extends AbstractSimulation {
+public class FindingK extends AbstractSimulation {
 	// simulation
 
 	// create a display frame named d
@@ -30,7 +30,7 @@ public class BungeeFinal extends AbstractSimulation {
 	double bungeeMass = 10;
 	double bungeeLength = 40;
 	double springNumber = 20;
-	double kTotal = 12;
+	double kTotal = 29.174; // 29.175 is too strong
 	double k = kTotal * springNumber;
 	double springMass = (bungeeMass / springNumber);
 	ArrayList<Spring> bungee = new ArrayList<Spring>();
@@ -117,7 +117,10 @@ public class BungeeFinal extends AbstractSimulation {
 				bungee.get(i).setPosition((0.5 * bungee.get(i).getA() * Math.pow(timeStep, 2))
 						+ (bungee.get(i).getVold() * timeStep) + bungee.get(i).getPosition());
 				bungee.get(i).setXY(control.getDouble("x"), bungee.get(i).getPosition());
-				System.out.println(bungee.get(0).getPosition());
+				if (bungee.get(0).getPosition() <= -100) {
+					System.out.println("STOP!!!");
+					System.out.println(bungee.get(0).getK());
+				}
 			}
 		}
 
@@ -129,7 +132,7 @@ public class BungeeFinal extends AbstractSimulation {
 	}
 
 	public static void main(String[] args) {
-		SimulationControl.createApp(new BungeeFinal());
+		SimulationControl.createApp(new FindingK());
 
 	}
 }
