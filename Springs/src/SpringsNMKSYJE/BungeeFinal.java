@@ -15,9 +15,6 @@ public class BungeeFinal extends AbstractSimulation {
 	// create a display frame named d
 	DisplayFrame d = new DisplayFrame("X", "Y", "Bungee Jumping Simulation");
 
-	// air resistance beta value
-	double b = .02;
-
 	// time
 	double timeStep = .01;
 
