@@ -16,10 +16,6 @@ public class Hair extends AbstractSimulation {
 	// time
 	double timeStep = .01;
 
-	// acceleration
-	double g = 9.81;
-	double a = -g;
-
 	// 1 meter
 	// 100 heavy
 	// 10 gram string
@@ -31,6 +27,7 @@ public class Hair extends AbstractSimulation {
 	// rest length of each one
 
 	// bungee variables
+	double restLength = 0;
 	double bungeeMass = 10;
 	double bungeeLength = 40;
 	double Springs = 20;
@@ -54,7 +51,7 @@ public class Hair extends AbstractSimulation {
 		d.setVisible(true);
 		// initializes the springs
 		for (int i = 0; i < Springs; i++) {
-			Spring s = new Spring(k, springMass, 0, 0, 0, a, 0);
+			Spring s = new Spring(k, springMass, 0, 0, 0, 0, 0, 0, 0, 0, timeStep);
 			d.addDrawable(s);
 			s.pixRadius = 3;
 			s.setXY(control.getDouble("x"), s.getPosition());
@@ -79,79 +76,66 @@ public class Hair extends AbstractSimulation {
 		// speeding it up
 		this.setDelayTime(1);
 
-		// free-fall first 40m
-		if (FreeFall == true) {
-			for (int i = 0; i < lastSpring; i++) {
-				// acceleration is g, so -9.81 m/s/s
-
-				// velocity: v(t) = at+v0
-				bungee.get(i).setV(bungee.get(i).getA() * timeStep + bungee.get(i).getVold());
-
-				// position: 1/2at^2 + v0t + x0
-				bungee.get(i).setPosition(0.5 * bungee.get(i).getA() * Math.pow(timeStep, 2)
-						+ (bungee.get(i).getVold() * timeStep) + bungee.get(i).getPosition());
-
-				// when it crosses the origin, the color changes to red
-				if (i != 0) {
-					if (bungee.get(i).getPosition() <= -0) {
-						bungee.get(i).color = Color.red;
-					}
-				}
-
-				// setting the person as green
-				bungee.get(0).color = Color.green;
-
-				// resets the position
-				bungee.get(i).setXY(control.getDouble("x"), bungee.get(i).getPosition());
-
-				// stops the freefall after 40 meters
-				if (bungee.get(0).getPosition() <= -40) {
-					// System.out.println(bungee.get(0).getV());
-					FreeFall = false;
-				}
-
-				// setting old velocity
-				bungee.get(i).setVold(bungee.get(i).getV());
+		// goes through each spring
+		for (int i = 0; i < lastSpring; i++) {
+			// different forces for the end springs
+			// the first spring
+			Spring s = bungee.get(i);
+			Spring sBefore = bungee.get(i - 1);
+			Spring sAfter = bungee.get(i + 1);
+			if (i == 0) {
+				s.setAx((s.getK() * (s.getDistance(sAfter) - restLength) * (sAfter.getX() - s.getX())
+						/ s.getDistance(sAfter)) / s.getM());
+				s.setAy((s.getK() * (s.getDistance(sAfter) - restLength) * (sAfter.getY() - s.getY())
+						/ s.getDistance(sAfter)) / s.getM());
 			}
-		} else {
-			// goes past 40 meters, the acceleration is not just -9.81m/s/s
-			// goes through each spring
-			for (int i = 0; i < lastSpring; i++) {
-				// different forces for the last spring
-				if (i == 0) {
-					// F = ma
-					// a = (k*(y (i+1) - y(i) - Length) - Length) - mg)/m
-					bungee.get(i)
-							.setA(((bungee.get(i).getK()
-									* (bungee.get(i + 1).getPosition() - bungee.get(i).getPosition() - springLength))
-									- (massPerson * g)) / massPerson);
-				}
-				// for all of the other springs
-				else {
-					// F = ma
-					// a = (k*(y (i+1) - y(i) - Length) - k*(y(i) - y(i-1) - Length) - mg)/m
-					bungee.get(i).setA(((bungee.get(i).getK()
-							* (bungee.get(i + 1).getPosition() - bungee.get(i).getPosition() - springLength))
-							- (bungee.get(i).getK()
-									* (bungee.get(i).getPosition() - bungee.get(i - 1).getPosition() - springLength))
-							- (bungee.get(i).getM() * g)) / bungee.get(i).getM());
+			// for all of the other springs
+			else if (i < lastSpring - 2) {
 
-				}
-				// resets the velocity: v(t) = at+v0
-				bungee.get(i).setV(bungee.get(i).getA() * timeStep + bungee.get(i).getVold());
-				// sets the old velocity
-				bungee.get(i).setVold(bungee.get(i).getV());
+				// a = f/m
+				// FX: a =( [-k*d(i-1) * (x(i)-x(i-1))/d(i-1)] + [k*d(i) * (x(i+1)-x(i))/d(i)]
+				// )/m
+				// FY: a =( [-k*d(i-1) * (y(i)-y(i-1))/d(i-1)] + [k*d(i) * (x(i+1)-x(i))/d(i)]
+				// )/m
+
+				s.setAx(((-s.getK() * (s.getDistance(sBefore) - restLength) * (s.getX() - sBefore.getX())
+						/ s.getDistance(sBefore))
+						+ s.getK() * (s.getDistance(sAfter) - restLength) * (sAfter.getX() - s.getX())
+								/ s.getDistance(sAfter))
+						/ s.getM());
+
+				s.setAy(((-s.getK() * (s.getDistance(sBefore) - restLength) * (s.getY() - sBefore.getY())
+						/ s.getDistance(sBefore))
+						+ s.getK() * (s.getDistance(sAfter) - restLength) * (sAfter.getY() - s.getY())
+								/ s.getDistance(sAfter))
+						/ s.getM());
+
 			}
-			// resets the position of each spring in the bungee
-			for (int i = 0; i < lastSpring; i++) {
-				// 1/2at^2 + v0t +x0
-				bungee.get(i).setPosition((0.5 * bungee.get(i).getA() * Math.pow(timeStep, 2))
-						+ (bungee.get(i).getVold() * timeStep) + bungee.get(i).getPosition());
-				// sets the animation
-				bungee.get(i).setXY(control.getDouble("x"), bungee.get(i).getPosition());
+			// the last one
+			else if (i == lastSpring - 1) {
+				s.setAx(((-s.getK() * (s.getDistance(sBefore) - restLength) * (s.getX() - sBefore.getX())
+						/ s.getDistance(sBefore))) / s.getM());
+
+				s.setAy(((-s.getK() * (s.getDistance(sBefore) - restLength) * (s.getY() - sBefore.getY())
+						/ s.getDistance(sBefore))) / s.getM());
+
 			}
+			// resets the velocity: v(t) = at+v0
+			s.setVx(s.getAx() * timeStep + s.getVoldX());
+			s.setVy(s.getAy() * timeStep + s.getVoldY());
+			// sets the old velocity
+			s.setVoldX(s.getVx());
+			s.setVoldY(s.getVy());
 		}
-
+		// resets the position of each spring in the bungee
+		for (int i = 0; i < lastSpring; i++) {
+			// 1/2at^2 + v0t +x0
+			// bungee.get(i).setPosition((0.5 * bungee.get(i).getA() * Math.pow(timeStep,
+			// 2))
+			// + (bungee.get(i).getVold() * timeStep) + bungee.get(i).getPosition());
+			// sets the animation
+			bungee.get(i).setXY(control.getDouble("x"), bungee.get(i).getPosition());
+		}
 	}
 
 	/**
