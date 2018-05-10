@@ -9,7 +9,7 @@ import org.opensourcephysics.controls.SimulationControl;
 import org.opensourcephysics.display.*;
 import org.opensourcephysics.frames.*;
 
-public class Hair extends AbstractSimulation {
+public class Cello extends AbstractSimulation {
 	// create a display frame named d
 	DisplayFrame d = new DisplayFrame("X", "Y", "Bungee Jumping Simulation");
 
@@ -140,7 +140,7 @@ public class Hair extends AbstractSimulation {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		SimulationControl.createApp(new Hair());
+		SimulationControl.createApp(new Cello());
 
 	}
 }
