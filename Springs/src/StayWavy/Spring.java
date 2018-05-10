@@ -22,6 +22,10 @@ public class Spring extends Circle {
 	public double getVx() {
 		return vx;
 	}
+	
+	public void oscY(double f, double y0) { 
+		this.y = y0*Math.sin(2*Math.PI*f*this.timeStep); 
+	}
 
 	public void setVx(double vx) {
 		this.vx = vx;
@@ -57,9 +61,11 @@ public class Spring extends Circle {
 		return position;
 	}
 
-	public void setPosition(double position) {
-//		this.x = (0.5 * this.getAx() * Math.pow(this.timeStep, 2))
-//				+ (this.getVoldX() * timeStep) + this.x));
+	public void setPosition() {
+		this.x = (0.5 * this.getAx() * this.timeStep*this.timeStep)
+				+ (this.getVoldX() * this.timeStep) + this.x;
+		this.y = (0.5 * this.getAy() * this.timeStep*this.timeStep)
+				+ (this.getVoldY() * this.timeStep) + this.y;
 	}
 
 	public double getDeltax() {
@@ -124,11 +130,12 @@ public class Spring extends Circle {
 	 * angle).
 	 *
 	 */
-	public Spring(double k, double m, double position, double deltax, double vx, double vy, double ax, double ay,
+	public Spring(double k, double m, double ex, double why, double deltax, double vx, double vy, double ax, double ay,
 			double v0x, double v0y, double ts) {
 		this.k = k;
 		this.m = m;
-		this.position = position;
+		this.x = ex;
+		this.y = why;
 		this.deltax = deltax;
 		this.vx = vx;
 		this.vy = vy;
