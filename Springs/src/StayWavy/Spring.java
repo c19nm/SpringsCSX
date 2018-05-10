@@ -23,8 +23,8 @@ public class Spring extends Circle {
 		return vx;
 	}
 	
-	public void oscY(double f, double y0) { 
-		this.y = y0*Math.sin(2*Math.PI*f*this.timeStep); 
+	public void oscY(double f, double y0, double time) { 
+		this.y = y0*Math.sin(2*Math.PI*f*time); 
 	}
 
 	public void setVx(double vx) {
