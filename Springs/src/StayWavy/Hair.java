@@ -37,8 +37,8 @@ public class Hair extends AbstractSimulation {
 	double springMass = (bungeeMass / Springs);
 	ArrayList<Spring> bungee = new ArrayList<Spring>();
 	double lastSpring = Springs - 1;
+	double frequency;
 	double springLength = (bungeeLength / Springs);
-	double frequency = 73.3333333333;
 	double y0 = .01;
 
 	// frequency
@@ -48,6 +48,7 @@ public class Hair extends AbstractSimulation {
 		// characteristics of the display frame
 		d.setPreferredMinMax(-.1, 1.1, -.15, .15);
 		d.setVisible(true);
+		frequency = control.getDouble("frequency");
 		// initializes the springs
 		for (int i = 0; i < Springs; i++) {
 			Spring s = new Spring(k, springMass, i * springLength, 0, 0, 0, 0, 0, 0, 0, 0, timeStep);
@@ -132,6 +133,7 @@ public class Hair extends AbstractSimulation {
 	public void reset() {
 		control.setValue("x", 0);
 		control.setValue("y", 0);
+		control.setValue("frequency", 36.6666);
 	}
 
 	/**

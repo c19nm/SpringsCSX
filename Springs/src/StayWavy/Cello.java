@@ -29,8 +29,8 @@ public class Cello extends AbstractSimulation {
 
 	// bungee variables
 	double restLength = 0;
-	double bungeeMass = .01;
-	double bungeeLength = 1;
+	double bungeeMass = .0127;
+	double bungeeLength = .8;
 	double Springs = 100;
 	double kTotal = 50;
 	double k = kTotal * Springs;
