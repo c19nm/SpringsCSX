@@ -9,7 +9,7 @@ import org.opensourcephysics.controls.SimulationControl;
 import org.opensourcephysics.display.*;
 import org.opensourcephysics.frames.*;
 
-public class Cello extends AbstractSimulation {
+public class FishingRod extends AbstractSimulation {
 	// create a display frame named d
 	DisplayFrame d = new DisplayFrame("X", "Y", "Cello String Simulation");
 
@@ -29,15 +29,15 @@ public class Cello extends AbstractSimulation {
 
 	// bungee variables
 	double restLength = .4;
-	double stringMass = .0127;
-	double stringLength = .8;
+	double bungeeMass = .0127;
+	double bungeeLength = .8;
 	double Springs = 100;
 	double kTotal = 100;
 	double k = kTotal * Springs;
-	double springMass = (stringMass / Springs);
+	double springMass = (bungeeMass / Springs);
 	ArrayList<Spring> bungee = new ArrayList<Spring>();
 	double lastSpring = Springs - 1;
-	double springLength = (stringLength / Springs);
+	double springLength = (bungeeLength / Springs);
 	double frequency = 63;
 	double y0 = .01;
 	double individualRestLength = restLength / Springs;
@@ -141,7 +141,7 @@ public class Cello extends AbstractSimulation {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		SimulationControl.createApp(new Cello());
+		SimulationControl.createApp(new FishingRod());
 
 	}
 }
