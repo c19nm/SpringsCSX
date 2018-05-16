@@ -3,6 +3,7 @@ package StayWavy;
 import org.opensourcephysics.controls.SimulationControl;
 import org.opensourcephysics.frames.DisplayFrame;
 import java.awt.Color;
+import java.awt.Frame;
 import java.util.ArrayList;
 import org.opensourcephysics.controls.AbstractSimulation;
 import org.opensourcephysics.controls.SimulationControl;
@@ -11,7 +12,7 @@ import org.opensourcephysics.frames.*;
 
 public class FishingRod extends AbstractSimulation {
 	// create a display frame named d
-	DisplayFrame d = new DisplayFrame("X", "Y", "Cello String Simulation");
+	DisplayFrame d = new DisplayFrame("X", "Y", "Fishing Rod Simulation");
 
 	// time
 	double timeStep = .0000001;
@@ -68,7 +69,7 @@ public class FishingRod extends AbstractSimulation {
 			this.setDelayTime(1);
 
 			// goes through each spring
-			for (int i = 0; i < lastSpring; i++) {
+			for (int i = 0; i <= lastSpring; i++) {
 				// different forces for the end springs
 				// the first spring
 				Spring s = bungee.get(i);
@@ -78,6 +79,7 @@ public class FishingRod extends AbstractSimulation {
 				}
 				// for all of the other springs
 				else if (i <= lastSpring - 1) {
+
 					// System.out.println(i);
 					Spring sAfter = bungee.get(i + 1);
 					Spring sBefore = bungee.get(i - 1);
@@ -99,7 +101,7 @@ public class FishingRod extends AbstractSimulation {
 									/ s.getDistance(sAfter))
 							/ s.getM());
 				}
-				// the last one
+				// // the last one
 				else if (i == lastSpring) {
 					Spring sBefore = bungee.get(i - 1);
 					s.setAx(((-s.getK() * (s.getDistance(sBefore) - individualRestLength) * (s.getX() - sBefore.getX())
@@ -118,12 +120,13 @@ public class FishingRod extends AbstractSimulation {
 				s.setVoldY(s.getVy());
 			}
 			// resets the position of each spring in the bungee
-			for (int i = 0; i < lastSpring; i++) {
+			for (int i = 0; i <= lastSpring; i++) {
 				Spring s = bungee.get(i);
 				s.setPosition();
 				s.setXY(s.x, s.y);
 			}
 			counter++;
+			control.println("last spring ax: " + bungee.get(bungee.size() - 1).ax);
 		}
 	}
 
