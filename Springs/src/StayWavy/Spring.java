@@ -92,6 +92,20 @@ public class Spring extends Circle {
 		this.v0y = v0y;
 	}
 
+//	public double getFx(Spring s2) { 
+////		(-s.getK() * (s.getDistance(sBefore) - individualRestLength) * (s.getX() - sBefore.getX())
+////				/ s.getDistance(sBefore))
+////				+ s.getK() * (s.getDistance(sAfter) - individualRestLength) * (sAfter.getX() - s.getX())
+////						/ s.getDistance(sAfter)));
+//	}
+	
+//	public double getFy(Spring s2) {
+////		((-s.getK() * (s.getDistance(sBefore) - individualRestLength) * (s.getY() - sBefore.getY())
+////				/ s.getDistance(sBefore))
+////				+ s.getK() * (s.getDistance(sAfter) - individualRestLength) * (sAfter.getY() - s.getY())
+////						/ s.getDistance(sAfter));
+//	}
+	
 	public double getAx() {
 		return ax;
 	}
@@ -99,6 +113,7 @@ public class Spring extends Circle {
 	public void setAx(double ax) {
 		this.ax = ax;
 	}
+	
 
 	public double getAy() {
 		return ay;
@@ -130,15 +145,12 @@ public class Spring extends Circle {
 	 * angle).
 	 *
 	 */
-	public Spring(double k, double m, double ex, double why, double deltax, double vx, double vy, double ax, double ay,
-			double v0x, double v0y, double ts) {
+	public Spring(double k, double m, double ex, double why,  double v0x, double v0y, double ax, double ay,
+		 double ts) {
 		this.k = k;
 		this.m = m;
 		this.x = ex;
 		this.y = why;
-		this.deltax = deltax;
-		this.vx = vx;
-		this.vy = vy;
 		this.ax = ax;
 		this.ay = ay;
 		this.v0y = v0y;
