@@ -38,7 +38,7 @@ public class Cello extends AbstractSimulation {
 	ArrayList<Spring> bungee = new ArrayList<Spring>();
 	double lastSpring = Springs - 1;
 	double springLength = (stringLength / Springs);
-	double frequency = 63;
+	double frequency; // 63
 	double y0 = .01;
 	double individualRestLength = restLength / Springs;
 
@@ -49,6 +49,7 @@ public class Cello extends AbstractSimulation {
 		// characteristics of the display frame
 		d.setPreferredMinMax(-.1, 1.1, -.15, .15);
 		d.setVisible(true);
+		frequency = control.getDouble("frequency");
 		// initializes the springs
 		for (int i = 0; i < Springs; i++) {
 			Spring s = new Spring(k, springMass, i * springLength, 0, 0, 0, 0, 0, 0, 0, 0, timeStep);
@@ -133,6 +134,8 @@ public class Cello extends AbstractSimulation {
 	public void reset() {
 		control.setValue("x", 0);
 		control.setValue("y", 0);
+		control.setValue("frequency", 63);
+		d.clearDrawables();
 	}
 
 	/**
