@@ -38,7 +38,7 @@ public class FlyCast extends AbstractSimulation {
 	ArrayList<Spring> bungee = new ArrayList<Spring>();
 	int lastSpring = Springs - 1;
 	double springLength = (lineLength / Springs);
-	double frequency; // 63
+	double frequency = 40; // 63
 	double y0 = .01;
 	double individualRestLength = restLength / Springs;
 	FishingRod rod;
@@ -60,90 +60,98 @@ public class FlyCast extends AbstractSimulation {
 		// bungee.add(s);
 		// d.addDrawable(s);
 		// }
-		rod = new FishingRod(100, 3, 99, 1.5, .0000001);
+		rod = new FishingRod(100, 3, 3, 1.5, .0000001);
+		for (int i = 0; i < rod.array.length; i++) {
+			rod.array[i][0].setXY(rod.array[i][0].x, rod.array[i][0].y);
+			rod.array[i][0].pixRadius = 3;
+			d.addDrawable(rod.array[i][0]);
+			rod.array[i][1].setXY(rod.array[i][1].x, rod.array[i][1].y);
+			rod.array[i][1].pixRadius = 3;
+			d.addDrawable(rod.array[i][1]);
+		}
+		horizontalRestLength = 1.1 * rod.array[0][0].getDistance(rod.array[0][1]);
+		verticalRestLength = 1.1 * rod.array[0][0].getDistance(rod.array[1][0]);
+		diagonalRestLength = 0.9 * Math.sqrt(horizontalRestLength * horizontalRestLength + verticalRestLength * verticalRestLength);
 	}
-
+double horizontalRestLength;
+double verticalRestLength;
+double diagonalRestLength;
 	/**
 	 * Goes through code repeatedly
 	 */
 	protected void doStep() {
+		
 		for (int sean = 0; sean < 1000; sean++) {
 			// speeding it up
 			this.setDelayTime(1);
 
 			for (int i = 0; i < rod.array.length; i++) {
-				for (int j = 0; i < rod.array[i].length; i++) {
+				for (int j = 0; j < rod.array[i].length; j++) {
 					Spring point = rod.array[i][j];
+					point.ax = 0;
+					point.ay = 0;
 					if (i == 0 && j == 0) {
-						rod.array[0]
-
-			
+						// point.oscX(frequency, y0, timeStep * counter);
+						// point.findA(point.getFs(rod.array[1][0], individualRestLength));
+						// point.findA(point.getFs(rod.array[0][1], individualRestLength));
+						// point.findA(point.getFs(rod.array[1][1], individualRestLength));
+					} else if (i == 0 && j == 1) {
+						// point.findA(point.getFs(rod.array[1][0], individualRestLength));
+						// point.findA(point.getFs(rod.array[0][0], individualRestLength));
+						// point.findA(point.getFs(rod.array[1][1], individualRestLength));
+					} else if (i < (rod.array.length - 2) && j == 0) {
+						// i-1, 0
+						// i+1, 0
+						// i, 1
+						// i+1, 1
+						// i-1, 1
+						point.findA(point.getFs(rod.array[i - 1][0], verticalRestLength));
+						point.findA(point.getFs(rod.array[i + 1][0], verticalRestLength));
+						point.findA(point.getFs(rod.array[i][1], horizontalRestLength));
+						point.findA(point.getFs(rod.array[i + 1][1], diagonalRestLength));
+						point.findA(point.getFs(rod.array[i - 1][1], diagonalRestLength));
+					} else if (i < (rod.array.length - 2) && j == 1) {
+						// i-1, 0
+						// i+1, 0
+						// i, 0
+						// i+1, 1
+						// i-1, 1
+						point.findA(point.getFs(rod.array[i - 1][0], diagonalRestLength));
+						point.findA(point.getFs(rod.array[i + 1][0], diagonalRestLength));
+						point.findA(point.getFs(rod.array[i][0], horizontalRestLength));
+						point.findA(point.getFs(rod.array[i + 1][1], verticalRestLength));
+						point.findA(point.getFs(rod.array[i - 1][1], verticalRestLength));
+					} else if (i == (rod.array.length - 1) && j == 0) {
+						point.findA(point.getFs(rod.array[i][1], horizontalRestLength));
+						point.findA(point.getFs(rod.array[i - 1][0], verticalRestLength));
+						point.findA(point.getFs(rod.array[i - 1][1], diagonalRestLength));
+					} else if (i == (rod.array.length - 1) && j == 1) {
+						point.findA(point.getFs(rod.array[i][0], horizontalRestLength));
+						point.findA(point.getFs(rod.array[i - 1][0], diagonalRestLength));
+						point.findA(point.getFs(rod.array[i - 1][1], verticalRestLength));
 					}
-
+					// velocity
+					System.out.println(point.getAx());
+					point.setVx(point.getAx() * timeStep + point.getVoldX());
+					point.setVy(point.getAy() * timeStep + point.getVoldY());
+					// sets the old velocity
+					point.setVoldX(point.getVx());
+					point.setVoldY(point.getVy());
 				}
-
 			}
 
-			// goes through each spring on the line
-			for (int i = 0; i <= lastSpring; i++) {
-				// different forces for the end springs
-				// the first spring
-				Spring s = bungee.get(i);
-				if (i == 0) {
-					s.oscY(frequency, y0, timeStep * counter);
-					// s.setY(s.y);
+			// POSITION
+			for (int i = 0; i < rod.array.length; i++) {
+				for (int j = 0; j < rod.array[i].length; j++) {
+					Spring point = rod.array[i][j];
+					point.setPosition();
+					point.setXY(point.x, point.y);
 				}
-				// for all of the other springs
-				else if (i <= lastSpring - 1) {
-					// System.out.println(i);
-					Spring sAfter = bungee.get(i + 1);
-					Spring sBefore = bungee.get(i - 1);
-					// a = f/m
-					// FX: a =( [-k*d(i-1) * (x(i)-x(i-1))/d(i-1)] + [k*d(i) * (x(i+1)-x(i))/d(i)]
-					// )/m
-					// FY: a =( [-k*d(i-1) * (y(i)-y(i-1))/d(i-1)] + [k*d(i) * (x(i+1)-x(i))/d(i)]
-					// )/m
-
-					s.setAx(((-s.getK() * (s.getDistance(sBefore) - individualRestLength) * (s.getX() - sBefore.getX())
-							/ s.getDistance(sBefore))
-							+ s.getK() * (s.getDistance(sAfter) - individualRestLength) * (sAfter.getX() - s.getX())
-									/ s.getDistance(sAfter))
-							/ s.getM());
-
-					s.setAy(((-s.getK() * (s.getDistance(sBefore) - individualRestLength) * (s.getY() - sBefore.getY())
-							/ s.getDistance(sBefore))
-							+ s.getK() * (s.getDistance(sAfter) - individualRestLength) * (sAfter.getY() - s.getY())
-									/ s.getDistance(sAfter))
-							/ s.getM());
-				}
-				// the last one
-				else if (i == lastSpring) {
-					Spring sBefore = bungee.get(i - 1);
-					s.setAx(((-s.getK() * (s.getDistance(sBefore) - individualRestLength) * (s.getX() - sBefore.getX())
-							/ s.getDistance(sBefore))) / s.getM());
-
-					s.setAy(((-s.getK() * (s.getDistance(sBefore) - individualRestLength) * (s.getY() - sBefore.getY())
-							/ s.getDistance(sBefore))) / s.getM());
-					s.color = Color.blue;
-
-				}
-				// resets the velocity: v(t) = at+v0
-				s.setVx(s.getAx() * timeStep + s.getVoldX());
-				s.setVy(s.getAy() * timeStep + s.getVoldY());
-				// sets the old velocity
-				s.setVoldX(s.getVx());
-				s.setVoldY(s.getVy());
 			}
-			// resets the position of each spring in the bungee
-			for (int i = 0; i <= lastSpring; i++) {
-				Spring s = bungee.get(i);
-				s.setPosition();
-				s.setXY(s.x, s.y);
-			}
-			counter++;
-			control.println("last spring ax: " + bungee.get(lastSpring).ax);
 		}
-	}
+		counter++;
+	} // FIG OUT ISSUE W UPDATING POSITION... TALK TO CONDIE
+		// PUSH FLYCAST, FISHINGROD, SPRING
 
 	/**
 	 * Resetting the values
@@ -161,7 +169,7 @@ public class FlyCast extends AbstractSimulation {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		SimulationControl.createApp(new Cello());
+		SimulationControl.createApp(new FlyCast());
 
 	}
 }
