@@ -28,7 +28,7 @@ public class FlyCast extends AbstractSimulation {
 	// rest length of each one
 
 	// bungee variables
-	double restLength = .4;
+	double restLength = .5;
 	double lineMass = .0127;
 	double lineLength = .8;
 	int Springs = 100;
@@ -41,26 +41,25 @@ public class FlyCast extends AbstractSimulation {
 	double frequency = 40; // 63
 	double y0 = .01;
 	double individualRestLength = restLength / Springs;
+	double sideLength = 1;
 	FishingRod rod;
+	double kRatio = (sideLength - individualRestLength) / ((2 * sideLength) - (Math.sqrt(2) * individualRestLength));
+	double Kh = 80;
+	double Kv = 1000;
+	double Kd = Kh * kRatio;
+	double FirstTime = 0;
+	double timeSpun = 100000;
 
 	// frequency
 
 	@Override
 	public void initialize() {
 		// characteristics of the display frame
-		d.setPreferredMinMax(-.1, 1.1, -.15, .15);
+		d.setPreferredMinMax(-1, 2, -1, 6.5);
 		d.setVisible(true);
 		frequency = control.getDouble("frequency");
-		// initializes the springs
-		// for (int i = 0; i < Springs; i++) {
-		// Spring s = new Spring(k, springMass, i * springLength, 0, 0, 0, 0, 0,
-		// timeStep);
-		// s.pixRadius = 3;
-		// s.setXY(s.x, s.y);
-		// bungee.add(s);
-		// d.addDrawable(s);
-		// }
-		rod = new FishingRod(100, 3, 3, 1.5, .0000001);
+		// makes a new rod
+		rod = new FishingRod(100, 3, 6, 1.5, sideLength, timeStep);
 		for (int i = 0; i < rod.array.length; i++) {
 			rod.array[i][0].setXY(rod.array[i][0].x, rod.array[i][0].y);
 			rod.array[i][0].pixRadius = 3;
@@ -69,19 +68,14 @@ public class FlyCast extends AbstractSimulation {
 			rod.array[i][1].pixRadius = 3;
 			d.addDrawable(rod.array[i][1]);
 		}
-		horizontalRestLength = 1.1 * rod.array[0][0].getDistance(rod.array[0][1]);
-		verticalRestLength = 1.1 * rod.array[0][0].getDistance(rod.array[1][0]);
-		diagonalRestLength = 0.9 * Math.sqrt(horizontalRestLength * horizontalRestLength + verticalRestLength * verticalRestLength);
 	}
-double horizontalRestLength;
-double verticalRestLength;
-double diagonalRestLength;
+
 	/**
 	 * Goes through code repeatedly
 	 */
 	protected void doStep() {
-		
-		for (int sean = 0; sean < 1000; sean++) {
+
+		for (int sean = 0; sean < 100; sean++) {
 			// speeding it up
 			this.setDelayTime(1);
 
@@ -90,56 +84,64 @@ double diagonalRestLength;
 					Spring point = rod.array[i][j];
 					point.ax = 0;
 					point.ay = 0;
-					if (i == 0 && j == 0) {
-						// point.oscX(frequency, y0, timeStep * counter);
-						// point.findA(point.getFs(rod.array[1][0], individualRestLength));
-						// point.findA(point.getFs(rod.array[0][1], individualRestLength));
-						// point.findA(point.getFs(rod.array[1][1], individualRestLength));
-					} else if (i == 0 && j == 1) {
-						// point.findA(point.getFs(rod.array[1][0], individualRestLength));
-						// point.findA(point.getFs(rod.array[0][0], individualRestLength));
-						// point.findA(point.getFs(rod.array[1][1], individualRestLength));
-					} else if (i < (rod.array.length - 2) && j == 0) {
+					if (FirstTime < timeSpun) {
+						if (i == 0 && j == 0) {
+							point.spin(sideLength, -1, 1, timeSpun, (Math.PI / 4));
+							// point.setXY(point.x, point.y);
+						} else if (i == 0 && j == 1) {
+							point.spin(sideLength, -1, -1, timeSpun, (Math.PI / 4));
+							// point.setXY(point.x, point.y);
+						} else if (i == 1 && j == 0) {
+							point.spin(sideLength, 1, 1, timeSpun, (Math.PI / 4));
+							// point.setXY(point.x, point.y);
+						} else if (i == 1 && j == 1) {
+							point.spin(sideLength, 1, -1, timeSpun, (Math.PI / 4));
+							// point.setXY(point.x, point.y);
+						}
+					}
+
+					if (i <= (rod.array.length - 2) && i != 0 && j == 0) {
 						// i-1, 0
 						// i+1, 0
 						// i, 1
 						// i+1, 1
 						// i-1, 1
-						point.findA(point.getFs(rod.array[i - 1][0], verticalRestLength));
-						point.findA(point.getFs(rod.array[i + 1][0], verticalRestLength));
-						point.findA(point.getFs(rod.array[i][1], horizontalRestLength));
-						point.findA(point.getFs(rod.array[i + 1][1], diagonalRestLength));
-						point.findA(point.getFs(rod.array[i - 1][1], diagonalRestLength));
-					} else if (i < (rod.array.length - 2) && j == 1) {
+						point.findA(point.getFs(rod.array[i - 1][0], individualRestLength, Kv));
+						point.findA(point.getFs(rod.array[i + 1][0], individualRestLength, Kv));
+						point.findA(point.getFs(rod.array[i][1], individualRestLength, Kh));
+						point.findA(point.getFs(rod.array[i + 1][1], individualRestLength, Kd));
+						point.findA(point.getFs(rod.array[i - 1][1], individualRestLength, Kd));
+					} else if (i <= (rod.array.length - 2) && i != 0 && j == 1) {
 						// i-1, 0
 						// i+1, 0
 						// i, 0
 						// i+1, 1
 						// i-1, 1
-						point.findA(point.getFs(rod.array[i - 1][0], diagonalRestLength));
-						point.findA(point.getFs(rod.array[i + 1][0], diagonalRestLength));
-						point.findA(point.getFs(rod.array[i][0], horizontalRestLength));
-						point.findA(point.getFs(rod.array[i + 1][1], verticalRestLength));
-						point.findA(point.getFs(rod.array[i - 1][1], verticalRestLength));
+						point.findA(point.getFs(rod.array[i - 1][0], individualRestLength, Kd));
+						point.findA(point.getFs(rod.array[i + 1][0], individualRestLength, Kd));
+						point.findA(point.getFs(rod.array[i][0], individualRestLength, Kh));
+						point.findA(point.getFs(rod.array[i + 1][1], individualRestLength, Kv));
+						point.findA(point.getFs(rod.array[i - 1][1], individualRestLength, Kv));
 					} else if (i == (rod.array.length - 1) && j == 0) {
-						point.findA(point.getFs(rod.array[i][1], horizontalRestLength));
-						point.findA(point.getFs(rod.array[i - 1][0], verticalRestLength));
-						point.findA(point.getFs(rod.array[i - 1][1], diagonalRestLength));
+						point.findA(point.getFs(rod.array[i][1], individualRestLength, Kh));
+						point.findA(point.getFs(rod.array[i - 1][0], individualRestLength, Kv));
+						point.findA(point.getFs(rod.array[i - 1][1], individualRestLength, Kd));
 					} else if (i == (rod.array.length - 1) && j == 1) {
-						point.findA(point.getFs(rod.array[i][0], horizontalRestLength));
-						point.findA(point.getFs(rod.array[i - 1][0], diagonalRestLength));
-						point.findA(point.getFs(rod.array[i - 1][1], verticalRestLength));
+						point.findA(point.getFs(rod.array[i][0], individualRestLength, Kh));
+						point.findA(point.getFs(rod.array[i - 1][0], individualRestLength, Kd));
+						point.findA(point.getFs(rod.array[i - 1][1], individualRestLength, Kv));
 					}
 					// velocity
-					System.out.println(point.getAx());
+					// System.out.println(point.getAx());
 					point.setVx(point.getAx() * timeStep + point.getVoldX());
 					point.setVy(point.getAy() * timeStep + point.getVoldY());
 					// sets the old velocity
 					point.setVoldX(point.getVx());
 					point.setVoldY(point.getVy());
+
 				}
 			}
-
+			FirstTime++;
 			// POSITION
 			for (int i = 0; i < rod.array.length; i++) {
 				for (int j = 0; j < rod.array[i].length; j++) {
@@ -150,8 +152,7 @@ double diagonalRestLength;
 			}
 		}
 		counter++;
-	} // FIG OUT ISSUE W UPDATING POSITION... TALK TO CONDIE
-		// PUSH FLYCAST, FISHINGROD, SPRING
+	}
 
 	/**
 	 * Resetting the values
@@ -160,6 +161,7 @@ double diagonalRestLength;
 		control.setValue("x", 0);
 		control.setValue("y", 0);
 		control.setValue("frequency", 63);
+		d.clearData();
 		d.clearDrawables();
 	}
 
