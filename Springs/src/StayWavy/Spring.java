@@ -15,16 +15,24 @@ public class Spring extends Circle {
 	double vy = 0; // velocity
 	double v0x = 0; // velocity
 	double v0y = 0; // velocity
+	double cos;
+	double sin;
+//	double Fx;
+//	double Fy;
 	double timeStep;
 	double x;
 	double y;
 
-	public double getVx() {
-		return vx;
-	}
-	
 	public void oscY(double f, double y0, double time) { 
 		this.y = y0*Math.sin(2*Math.PI*f*time); 
+	}
+	
+	public void oscX(double f, double x0, double time) { 
+		this.x = x0*Math.cos(2*Math.PI*f*time); 
+	}
+	
+	public double getVx() {
+		return vx;
 	}
 
 	public void setVx(double vx) {
@@ -92,19 +100,10 @@ public class Spring extends Circle {
 		this.v0y = v0y;
 	}
 
-//	public double getFx(Spring s2) { 
-////		(-s.getK() * (s.getDistance(sBefore) - individualRestLength) * (s.getX() - sBefore.getX())
-////				/ s.getDistance(sBefore))
-////				+ s.getK() * (s.getDistance(sAfter) - individualRestLength) * (sAfter.getX() - s.getX())
-////						/ s.getDistance(sAfter)));
-//	}
-	
-//	public double getFy(Spring s2) {
-////		((-s.getK() * (s.getDistance(sBefore) - individualRestLength) * (s.getY() - sBefore.getY())
-////				/ s.getDistance(sBefore))
-////				+ s.getK() * (s.getDistance(sAfter) - individualRestLength) * (sAfter.getY() - s.getY())
-////						/ s.getDistance(sAfter));
-//	}
+	public double getFs(Spring og, double individualRestLength) { 
+		double Fs = this.getK() * (this.getDistance(og) - individualRestLength);
+		return Fs;
+	}
 	
 	public double getAx() {
 		return ax;
@@ -114,6 +113,10 @@ public class Spring extends Circle {
 		this.ax = ax;
 	}
 	
+	public void findA(double Fs) {
+		this.ax += (Fs*cos)/this.m;
+		this.ay += (Fs*sin)/this.m;
+	}
 
 	public double getAy() {
 		return ay;
@@ -125,13 +128,15 @@ public class Spring extends Circle {
 
 	public double getDistance(Spring og) {
 		double distance;
-		double xComp = this.getX() - og.getX();
-		double yComp = this.getY() - og.getY();
+		double xComp = og.getX() - this.getX();
+		double yComp = og.getY() - this.getY();
 		distance = Math.sqrt(xComp * xComp + yComp * yComp);
+		cos = xComp/distance;
+		sin = yComp/distance;
 		return distance;
 	}
 
-	public double getXDIstance(Spring og) {
+	public double getXDistance(Spring og) {
 		return this.getX() - og.getX();
 	}
 
@@ -157,5 +162,6 @@ public class Spring extends Circle {
 		this.v0x = v0x;
 		this.timeStep = ts;
 	}
+	
 
 }
