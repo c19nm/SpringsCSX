@@ -69,12 +69,6 @@ public class Spring extends Circle {
 		this.m = m;
 	}
 
-	public double getPosition() {
-		// this.x =
-		// this.y =
-		return position;
-	}
-
 	public void setPosition() {
 		this.x = (0.5 * this.getAx() * this.timeStep * this.timeStep) + (this.getVoldX() * this.timeStep) + this.x;
 		this.y = (0.5 * this.getAy() * this.timeStep * this.timeStep) + (this.getVoldY() * this.timeStep) + this.y;
