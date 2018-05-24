@@ -14,7 +14,7 @@ public class FlyFishing extends AbstractSimulation {
 	DisplayFrame d = new DisplayFrame("X", "Y", "Cello String Simulation");
 
 	// time
-	double timeStep = .0000001;
+	double timeStep = .00001;
 	int counter = 0;
 
 	// 1 meter
@@ -28,11 +28,11 @@ public class FlyFishing extends AbstractSimulation {
 	// rest length of each one
 
 	// bungee variables
-	double LineRestLength = .5;
+	double LineRestLength = .05;
 	double lineMass = .0127;
-	double lineLength = .25;
+	double lineLength = 1;
 	int Springs = 30;
-	double kTotal = 100;
+	double kTotal = 1000;
 	double k = kTotal * Springs;
 	double springMass = (lineMass / Springs);
 	ArrayList<Spring> bungee = new ArrayList<Spring>();
@@ -41,16 +41,16 @@ public class FlyFishing extends AbstractSimulation {
 	double frequency = 40; // 63
 	double y0 = .01;
 	double lineParticleRestLength = LineRestLength / Springs;
-	double sideLength = 1;
+	double sideLength = .25;
 	FishingRod rod;
-	double rodRestLength = 0.5;
+	double rodRestLength = sideLength;
 	double kRatio = (sideLength - rodRestLength) / ((2 * sideLength) - (Math.sqrt(2) * rodRestLength));
-	double Kh = 80000;
-	double Kv = Kh;
+	double Kh = 8000000;
+	double Kv = 800000000;
 	double Kd = Kh * kRatio;
 	double FirstTime = 0;
-	double timeSpun = 100000;
-	int NumofParticles = 6;
+	double timeSpun = 1000;
+	int NumofParticles = 50;
 	int neg = 1;
 	double b = .2;
 	double drag = 0;
@@ -76,11 +76,17 @@ public class FlyFishing extends AbstractSimulation {
 			d.addDrawable(rod.array[i][1]);
 		}
 		for (int i = 0; i < Springs; i++) {
-			Spring s = new Spring(k, springMass, 1 + (i * springLength), 5, 0, 0, 0, 0, timeStep);
+			Spring s = new Spring(k, springMass, -(i * springLength), sideLength * (NumofParticles - 1), 0, 0, 0, 0,
+					timeStep);
 			s.pixRadius = 3;
+			s.color = Color.cyan;
 			s.setXY(s.x, s.y);
 			bungee.add(s);
 			d.addDrawable(s);
+			if (i == lastSpring) {
+				s.m = 10;
+				s.v0x = 40;
+			}
 		}
 	}
 
@@ -98,23 +104,24 @@ public class FlyFishing extends AbstractSimulation {
 					Spring point = rod.array[i][j];
 					point.ax = 0;
 					point.ay = 0;
-					if (FirstTime < timeSpun) {
-						if (i == 0 && j == 0) {
-							point.spin(sideLength, -1, 1, timeSpun, (Math.PI / 4));
-							// point.setXY(point.x, point.y);
-						} else if (i == 0 && j == 1) {
-							point.spin(sideLength, -1, -1, timeSpun, (Math.PI / 4));
-							// point.setXY(point.x, point.y);
-						} else if (i == 1 && j == 0) {
-							point.spin(sideLength, 1, 1, timeSpun, (Math.PI / 4));
-							// point.setXY(point.x, point.y);
-						} else if (i == 1 && j == 1) {
-							point.spin(sideLength, 1, -1, timeSpun, (Math.PI / 4));
-							// point.setXY(point.x, point.y);
-						}
+					// if (FirstTime < timeSpun) {
+					if (i == 0 && j == 0) {
+						// point.spin(sideLength, -1, 1, timeSpun, (Math.PI / 4));
+						point.oscX(frequency, y0, FirstTime * timeStep);
+						point.setX(point.x);
+					} else if (i == 0 && j == 1) {
+						// point.spin(sideLength, -1, -1, timeSpun, (Math.PI / 4));
+						point.x = rod.array[0][0].x + sideLength;
+						point.setX(point.x);
 					}
+					// else if (i == 1 && j == 0) {
+					// // point.spin(sideLength, 1, 1, timeSpun, (Math.PI / 4));
+					// } else if (i == 1 && j == 1) {
+					// // point.spin(sideLength, 1, -1, timeSpun, (Math.PI / 4));
+					// }
+					// }
 
-					if (i <= (rod.array.length - 2) && i != 0 && j == 0) {
+					else if (i <= (rod.array.length - 2) && i > 0 && j == 0) {
 						// i-1, 0
 						// i+1, 0
 						// i, 1
@@ -125,7 +132,7 @@ public class FlyFishing extends AbstractSimulation {
 						point.findA(point.getFs(rod.array[i][1], rodRestLength, Kh));
 						point.findA(point.getFs(rod.array[i + 1][1], rodRestLength, Kd));
 						point.findA(point.getFs(rod.array[i - 1][1], rodRestLength, Kd));
-					} else if (i <= (rod.array.length - 2) && i != 0 && j == 1) {
+					} else if (i <= (rod.array.length - 2) && i > 0 && j == 1) {
 						// i-1, 0
 						// i+1, 0
 						// i, 0
@@ -138,12 +145,12 @@ public class FlyFishing extends AbstractSimulation {
 						point.findA(point.getFs(rod.array[i - 1][1], rodRestLength, Kv));
 					} else if (i == (rod.array.length - 1) && j == 0) {
 						point.findA(point.getFs(rod.array[i][1], rodRestLength, Kh));
-						point.findA(point.getFs(rod.array[i - 1][0], rodRestLength, Kv));
+						// point.findA(point.getFs(rod.array[i - 1][0], rodRestLength, Kv));
 						point.findA(point.getFs(rod.array[i - 1][1], rodRestLength, Kd));
 					} else if (i == (rod.array.length - 1) && j == 1) {
 						point.findA(point.getFs(rod.array[i][0], rodRestLength, Kh));
 						point.findA(point.getFs(rod.array[i - 1][0], rodRestLength, Kd));
-						point.findA(point.getFs(rod.array[i - 1][1], rodRestLength, Kv));
+						// point.findA(point.getFs(rod.array[i - 1][1], rodRestLength, Kv));
 					}
 					// velocity
 					// System.out.println(point.getAx());
@@ -161,10 +168,10 @@ public class FlyFishing extends AbstractSimulation {
 				// the first spring
 				Spring s = bungee.get(i);
 				if (i == 0) {
-					s.x = rod.array[NumofParticles - 1][1].x;
-					s.y = rod.array[NumofParticles - 1][1].y;
-					s.setX(rod.array[NumofParticles - 1][1].x);
-					s.setY(rod.array[NumofParticles - 1][1].y);
+					s.x = rod.array[NumofParticles - 2][0].x;
+					s.y = rod.array[NumofParticles - 2][0].y;
+					s.setX(rod.array[NumofParticles - 2][0].x);
+					s.setY(rod.array[NumofParticles - 2][0].y);
 				}
 				// for all of the other springs
 				else if (i <= lastSpring - 1) {
@@ -183,11 +190,11 @@ public class FlyFishing extends AbstractSimulation {
 									/ s.getDistance(sAfter))
 							/ s.getM());
 
-					s.setAy(((-s.getK() * (s.getDistance(sBefore) - lineParticleRestLength)
+					s.setAy((((-s.getK() * (s.getDistance(sBefore) - lineParticleRestLength)
 							* (s.getY() - sBefore.getY()) / s.getDistance(sBefore))
 							+ s.getK() * (s.getDistance(sAfter) - lineParticleRestLength) * (sAfter.getY() - s.getY())
 									/ s.getDistance(sAfter))
-							/ s.getM());
+							/ s.getM()) - 9.81);
 				}
 				// the last one
 				else if (i == lastSpring) {
@@ -211,12 +218,12 @@ public class FlyFishing extends AbstractSimulation {
 					}
 					// bv^2
 					drag = neg * b * s.getVy() * s.getVy();
-					s.setAy((Ay + drag) / s.getM());
+					s.setAy(((Ay + drag) / s.getM()) - 9.81);
 
 					// THE LINE IS DISAPPEARING BEACUSE OF THE WAY THE PARTICLE FALLS
-					System.out.println(drag);
-					System.out.println(s.getDistance(sBefore));
-					System.out.println(" ");
+					// System.out.println(drag);
+					// System.out.println(s.getDistance(sBefore));
+					// System.out.println(" ");
 					s.color = Color.blue;
 				}
 				// resets the velocity: v(t) = at+v0
