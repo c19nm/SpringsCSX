@@ -26,6 +26,9 @@ public class Cello extends AbstractSimulation {
 	// shake the end point with a sine function
 	// 1cm of movement
 	// rest length of each one
+	
+	
+	//three frequencies, one like 12
 
 	// bungee variables
 	double restLength = .4;
@@ -51,7 +54,7 @@ public class Cello extends AbstractSimulation {
 		d.setVisible(true);
 		// initializes the springs
 		for (int i = 0; i < Springs; i++) {
-			Spring s = new Spring(k, springMass, i * springLength, 0, 0, 0, 0, 0, 0, 0, 0, timeStep);
+			Spring s = new Spring(k, springMass, i * springLength, 0, 0, 0, 0, 0, timeStep);
 			s.pixRadius = 3;
 			s.setXY(s.x, s.y);
 			bungee.add(s);
