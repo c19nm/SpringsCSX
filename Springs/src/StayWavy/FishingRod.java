@@ -22,7 +22,7 @@ public class FishingRod {
 
 		for (int i = 0; i < particleNum; i++) {
 			array[i][0] = new Spring(k - 10 * i, springmass, 0, i * sideLength, 0, 0, 0, 0, timestep);
-			array[i][1] = new Spring(k - 10 * i, springmass, 1, i * sideLength, 0, 0, 0, 0, timestep);
+			array[i][1] = new Spring(k - 10 * i, springmass, sideLength, i * sideLength, 0, 0, 0, 0, timestep);
 		}
 	}
 
