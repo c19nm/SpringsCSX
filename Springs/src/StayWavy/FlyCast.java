@@ -44,8 +44,8 @@ public class FlyCast extends AbstractSimulation {
 	double sideLength = 1;
 	FishingRod rod;
 	double kRatio = (sideLength - individualRestLength) / ((2 * sideLength) - (Math.sqrt(2) * individualRestLength));
-	double Kh = 80;
-	double Kv = 1000;
+	double Kh = 80000;
+	double Kv = Kh;
 	double Kd = Kh * kRatio;
 	double FirstTime = 0;
 	double timeSpun = 100000;
