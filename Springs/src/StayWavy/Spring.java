@@ -24,7 +24,8 @@ public class Spring extends Circle {
 	double y;
 
 	public void oscX(double f, double x0, double time) {
-		this.x = 100*x0 * Math.sin(2 * Math.PI * f * time);
+		this.x = 75 * x0 * -1 * Math.sin(2 * Math.PI * f * time);
+
 	}
 
 	public void oscY(double f, double y0, double time) {
