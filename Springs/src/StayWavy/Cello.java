@@ -26,9 +26,8 @@ public class Cello extends AbstractSimulation {
 	// shake the end point with a sine function
 	// 1cm of movement
 	// rest length of each one
-	
-	
-	//three frequencies, one like 12
+
+	// three frequencies, one like 12
 
 	// bungee variables
 	double restLength = .4;
@@ -41,7 +40,8 @@ public class Cello extends AbstractSimulation {
 	ArrayList<Spring> bungee = new ArrayList<Spring>();
 	double lastSpring = Springs - 1;
 	double springLength = (stringLength / Springs);
-	double frequency = 63;
+	//double frequency = 63;
+	double frequency = 31;
 	double y0 = .01;
 	double individualRestLength = restLength / Springs;
 
@@ -111,6 +111,7 @@ public class Cello extends AbstractSimulation {
 					s.setAy(((-s.getK() * (s.getDistance(sBefore) - individualRestLength) * (s.getY() - sBefore.getY())
 							/ s.getDistance(sBefore))) / s.getM());
 					s.color = Color.blue;
+					System.out.println(s.getAy());
 
 				}
 				// resets the velocity: v(t) = at+v0
@@ -121,7 +122,7 @@ public class Cello extends AbstractSimulation {
 				s.setVoldY(s.getVy());
 			}
 			// resets the position of each spring in the bungee
-			for (int i = 0; i < lastSpring; i++) {
+			for (int i = 0; i < Springs; i++) {
 				Spring s = bungee.get(i);
 				s.setPosition();
 				s.setXY(s.x, s.y);
